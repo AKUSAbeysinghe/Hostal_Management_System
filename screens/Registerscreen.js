@@ -10,6 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useFocusEffect } from '@react-navigation/native'; // optional if needed later
 
 export default function UserRegisterScreen({ navigation }) {
   const [fullName, setFullName] = useState('');
@@ -18,12 +19,13 @@ export default function UserRegisterScreen({ navigation }) {
 
   const handleRegister = () => {
     console.log('User registration:', { fullName, email, password });
+    // In real app → add validation + API call here
     navigation.navigate('Login');
   };
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: '#E0F7FA' }}
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
@@ -33,57 +35,55 @@ export default function UserRegisterScreen({ navigation }) {
       >
         <View style={styles.innerContainer}>
 
-          {/* 🔙 Back Button */}
+          {/* Back Button */}
           <TouchableOpacity
             style={styles.backBtn}
             onPress={() => navigation.goBack()}
           >
-            <Icon name="arrow-back" size={26} color="#004D40" />
+            <Icon name="arrow-back" size={28} color="#1E293B" />
             <Text style={styles.backText}>Back</Text>
           </TouchableOpacity>
 
-          {/* Topic */}
-          <Text style={styles.topicText}>🏠 Hostel Issue Reporter</Text>
+          <Text style={styles.welcomeText}>Create Account</Text>
 
           <Icon
             name="how-to-reg"
-            size={80}
+            size={90}
             color="#26A69A"
             style={styles.logo}
           />
 
-          <Text style={styles.title}>User Registration</Text>
           <Text style={styles.subtitle}>
-            Create your account to report hostel issues easily
+            Join to report and track hostel issues effortlessly
           </Text>
 
           {/* Full Name */}
-          <View style={styles.inputWrapper}>
+          <View style={styles.fieldContainer}>
             <Text style={styles.inputLabel}>Full Name</Text>
-            <View style={styles.inputBox}>
-              <Icon name="person-add" size={22} color="#00796B" style={styles.inputIcon} />
+            <View style={styles.inputWrapper}>
+              <Icon name="person-add" size={24} color="#64748B" style={styles.inputIcon} />
               <TextInput
                 value={fullName}
                 onChangeText={setFullName}
                 style={styles.input}
-                placeholder="Enter full name"
-                placeholderTextColor="#00796B"
+                placeholder="Enter your full name"
+                placeholderTextColor="#94A3B8"
                 autoCapitalize="words"
               />
             </View>
           </View>
 
           {/* Email */}
-          <View style={styles.inputWrapper}>
+          <View style={styles.fieldContainer}>
             <Text style={styles.inputLabel}>Email / University ID</Text>
-            <View style={styles.inputBox}>
-              <Icon name="mail" size={22} color="#00796B" style={styles.inputIcon} />
+            <View style={styles.inputWrapper}>
+              <Icon name="mail-outline" size={24} color="#64748B" style={styles.inputIcon} />
               <TextInput
                 value={email}
                 onChangeText={setEmail}
                 style={styles.input}
-                placeholder="Enter email or ID"
-                placeholderTextColor="#00796B"
+                placeholder="e.g. 2020cs123@stu.cmb.ac.lk"
+                placeholderTextColor="#94A3B8"
                 autoCapitalize="none"
                 keyboardType="email-address"
               />
@@ -91,24 +91,27 @@ export default function UserRegisterScreen({ navigation }) {
           </View>
 
           {/* Password */}
-          <View style={styles.inputWrapper}>
+          <View style={styles.fieldContainer}>
             <Text style={styles.inputLabel}>Password</Text>
-            <View style={styles.inputBox}>
-              <Icon name="lock" size={22} color="#00796B" style={styles.inputIcon} />
+            <View style={styles.inputWrapper}>
+              <Icon name="lock-outline" size={24} color="#64748B" style={styles.inputIcon} />
               <TextInput
                 value={password}
                 onChangeText={setPassword}
                 style={styles.input}
-                placeholder="Enter password"
-                placeholderTextColor="#00796B"
+                placeholder="Create a secure password"
+                placeholderTextColor="#94A3B8"
                 secureTextEntry
               />
             </View>
           </View>
 
           {/* Register Button */}
-          <TouchableOpacity style={styles.btn} onPress={handleRegister}>
-            <Icon name="person-add-alt-1" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+          <TouchableOpacity
+            style={styles.registerBtn}
+            onPress={handleRegister}
+            activeOpacity={0.85}
+          >
             <Text style={styles.btnText}>Register</Text>
           </TouchableOpacity>
 
@@ -118,115 +121,127 @@ export default function UserRegisterScreen({ navigation }) {
             onPress={() => navigation.navigate('Login')}
           >
             <Text style={styles.loginText}>
-              Already have an account? <Text style={{ fontWeight: 'bold' }}>Login</Text>
+              Already have an account? <Text style={styles.loginHighlight}>Sign in</Text>
             </Text>
           </TouchableOpacity>
 
-          <View style={{ height: 120 }} />
-
+          <View style={{ height: 80 }} />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
-/* ───── Styles ───── */
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+  },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 28,
     paddingVertical: 40,
   },
   innerContainer: {
     alignItems: 'center',
   },
 
-  /* Back Button */
   backBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    marginBottom: 12,
+    marginBottom: 32,
   },
   backText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
-    color: '#004D40',
-    marginLeft: 6,
+    color: '#1E293B',
+    marginLeft: 8,
   },
 
-  topicText: {
-    fontSize: 20,
+  welcomeText: {
+    fontSize: 32,
     fontWeight: '700',
-    color: '#004D40',
-    marginBottom: 16,
+    color: '#1E293B',
+    marginBottom: 8,
+    letterSpacing: 0.4,
   },
   logo: {
-    marginBottom: 24,
-    opacity: 0.9,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#004D40',
-    marginBottom: 8,
+    marginVertical: 32,
   },
   subtitle: {
     fontSize: 16,
-    color: '#00695C',
-    marginBottom: 32,
+    color: '#64748B',
+    marginBottom: 48,
     textAlign: 'center',
+    paddingHorizontal: 32,
+    lineHeight: 24,
   },
-  inputWrapper: {
+
+  fieldContainer: {
     width: '100%',
-    marginBottom: 16,
+    marginBottom: 28,
   },
   inputLabel: {
-    color: '#004D40',
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
-    marginBottom: 6,
+    color: '#1E293B',
+    marginBottom: 10,
   },
-  inputBox: {
+  inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#B2DFDB',
-    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#00796B',
-    paddingHorizontal: 12,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
   },
   inputIcon: {
-    marginRight: 12,
+    marginRight: 14,
   },
   input: {
     flex: 1,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: '#004D40',
-  },
-  btn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#00796B',
     paddingVertical: 16,
+    fontSize: 17,
+    color: '#1E293B',
+  },
+
+  registerBtn: {
+    backgroundColor: '#26A69A',
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
     width: '100%',
-    borderRadius: 12,
-    marginBottom: 16,
-    elevation: 4,
+    marginBottom: 20,
+    shadowColor: '#26A69A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 10,
+    elevation: 6,
   },
   btnText: {
     color: '#FFFFFF',
-    fontWeight: '700',
     fontSize: 17,
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
+
   loginLink: {
-    marginTop: 8,
+    alignItems: 'center',
   },
   loginText: {
-    color: '#004D40',
-    fontSize: 15,
+    fontSize: 16,
+    color: '#64748B',
+  },
+  loginHighlight: {
+    color: '#26A69A',
+    fontWeight: '700',
   },
 });

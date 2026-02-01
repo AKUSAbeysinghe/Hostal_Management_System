@@ -9,19 +9,19 @@ import {
   Modal,
   TextInput,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { ComplaintContext } from '../App';
 
 export default function WardenDashboard({ navigation }) {
   const { complaints, setComplaints } = useContext(ComplaintContext);
 
-  // Modal state
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedComplaintId, setSelectedComplaintId] = useState(null);
   const [staffName, setStaffName] = useState('');
 
   const openAssignModal = (id) => {
     setSelectedComplaintId(id);
-    setStaffName(''); // reset input
+    setStaffName('');
     setModalVisible(true);
   };
 
@@ -54,79 +54,126 @@ export default function WardenDashboard({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* Back Button – same as other screens */}
       <TouchableOpacity
         style={styles.backBtn}
-        onPress={() => navigation.navigate('Login')}
+        onPress={() => navigation.goBack()}
       >
-        <Text style={styles.backText}>← Back</Text>
+        <Icon name="arrow-back" size={28} color="#1E293B" />
+        <Text style={styles.backText}>Back</Text>
       </TouchableOpacity>
 
-      <Text style={styles.header}>Warden Dashboard</Text>
+      <Text style={styles.header}>Pending Complaints</Text>
 
-      {complaints.length === 0 && (
-        <Text style={styles.emptyText}>No complaints received yet.</Text>
+      {complaints.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Icon
+            name="inbox"
+            size={72}
+            color="#94A3B8"
+            style={{ marginBottom: 20 }}
+          />
+          <Text style={styles.emptyText}>
+            No complaints received yet.{'\n'}
+            New reports from students will appear here.
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={complaints}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          renderItem={({ item }) => (
+            <View style={styles.complaintCard}>
+              <View style={styles.cardHeader}>
+                <Icon
+                  name="report-problem"
+                  size={26}
+                  color="#26A69A"
+                  style={styles.headerIcon}
+                />
+                <Text style={styles.title}>{item.category} Issue</Text>
+              </View>
+
+              <Text style={styles.description}>{item.description}</Text>
+
+              <View style={styles.metaContainer}>
+                <View style={styles.metaRow}>
+                  <Icon name="schedule" size={18} color="#64748B" />
+                  <Text style={styles.metaText}>Status: {item.status}</Text>
+                </View>
+                {item.assignedTo && (
+                  <View style={styles.metaRow}>
+                    <Icon name="person" size={18} color="#64748B" />
+                    <Text style={styles.metaText}>
+                      Assigned to: {item.assignedTo}
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              {item.status === 'Pending' && (
+                <TouchableOpacity
+                  style={styles.assignButton}
+                  onPress={() => openAssignModal(item.id)}
+                  activeOpacity={0.85}
+                >
+                  <Icon
+                    name="person-add"
+                    size={20}
+                    color="#FFFFFF"
+                    style={{ marginRight: 10 }}
+                  />
+                  <Text style={styles.buttonText}>Assign to Staff</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+        />
       )}
 
-      <FlatList
-        data={complaints}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text style={styles.title}>{item.category} Issue</Text>
-            <Text style={styles.description}>{item.description}</Text>
-            <Text style={styles.status}>Status: {item.status}</Text>
-            {item.assignedTo && (
-              <Text style={styles.assigned}>Assigned To: {item.assignedTo}</Text>
-            )}
-
-            {item.status === 'Pending' && (
-              <TouchableOpacity
-                style={styles.btn}
-                onPress={() => openAssignModal(item.id)}
-              >
-                <Text style={styles.btnText}>Assign to Staff</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        )}
-      />
-
-      {/* Assign Staff Modal */}
+      {/* Assign Modal */}
       <Modal
         visible={modalVisible}
-        transparent={true}
+        transparent
         animationType="fade"
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Assign to Staff</Text>
+            <Text style={styles.modalHeader}>Assign to Staff</Text>
 
             <TextInput
-              style={styles.input}
-              placeholder="Enter staff name"
+              style={styles.modalInput}
+              placeholder="Enter staff name (e.g. Mr. Kamal)"
               value={staffName}
               onChangeText={setStaffName}
-              placeholderTextColor="#78909C"
+              placeholderTextColor="#94A3B8"
               autoFocus
             />
 
-            <View style={styles.modalButtons}>
+            <View style={styles.modalButtonRow}>
               <TouchableOpacity
-                style={[styles.modalBtn, styles.cancelBtn]}
+                style={styles.cancelModalBtn}
                 onPress={() => {
                   setModalVisible(false);
                   setStaffName('');
                 }}
               >
-                <Text style={styles.modalBtnTextCancel}>Cancel</Text>
+                <Text style={styles.cancelModalText}>Cancel</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.modalBtn, styles.assignBtn]}
+                style={styles.assignModalBtn}
                 onPress={handleAssign}
               >
-                <Text style={styles.modalBtnText}>Assign</Text>
+                <Icon
+                  name="person-add"
+                  size={20}
+                  color="#FFFFFF"
+                  style={{ marginRight: 10 }}
+                />
+                <Text style={styles.assignModalText}>Assign Now</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -139,143 +186,188 @@ export default function WardenDashboard({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#E0F7FA', // Light cyan background
-  },
-  backBtn: {
-    marginBottom: 12,
-  },
-  backText: {
-    color: '#1976D2', // Deep blue
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 16,
-    color: '#0D47A1', // Deep navy
-  },
-  emptyText: {
-    color: '#78909C',
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 24,
-  },
-  item: {
-    backgroundColor: '#F0FCFF', // Very light cyan-white card
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#B3E5FC',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  title: {
-    fontWeight: '700',
-    fontSize: 17,
-    color: '#0D47A1',
-    marginBottom: 6,
-  },
-  description: {
-    color: '#455A64',
-    fontSize: 15,
-    marginBottom: 8,
-  },
-  status: {
-    color: '#78909C',
-    fontSize: 14,
-    marginBottom: 6,
-  },
-  assigned: {
-    color: '#546E7A',
-    fontSize: 14,
-    marginBottom: 12,
-  },
-  btn: {
-    marginTop: 10,
-    backgroundColor: '#26A69A', // Mint teal primary action
-    padding: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  btnText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-    fontSize: 15,
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: 24,
+    paddingTop: 40,
   },
 
-  // ── Modal Styles ──
-  modalOverlay: {
+  backBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    marginBottom: 36,
+  },
+  backText: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#1E293B',
+    marginLeft: 10,
+  },
+
+  header: {
+    fontSize: 30,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 32,
+    letterSpacing: 0.3,
+  },
+
+  emptyContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  emptyText: {
+    fontSize: 16.5,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 26,
+  },
+
+  listContent: {
+    paddingBottom: 60,
+  },
+
+  complaintCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 22,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  headerIcon: {
+    marginRight: 14,
+  },
+  title: {
+    fontSize: 18.5,
+    fontWeight: '700',
+    color: '#1E293B',
+  },
+
+  description: {
+    fontSize: 15.5,
+    color: '#475569',
+    lineHeight: 24,
+    marginBottom: 20,
+  },
+
+  metaContainer: {
+    marginBottom: 20,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  metaText: {
+    fontSize: 14.5,
+    color: '#64748B',
+    marginLeft: 8,
+  },
+
+  assignButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#26A69A',
+    paddingVertical: 16,
+    borderRadius: 18,
+    shadowColor: '#26A69A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16.5,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.45)',
   },
   modalContent: {
-    width: '88%',
+    width: '90%',
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
-    alignItems: 'center',
+    borderRadius: 24,
+    padding: 28,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 10,
+    shadowRadius: 20,
+    elevation: 12,
   },
-  modalTitle: {
-    fontSize: 20,
+  modalHeader: {
+    fontSize: 26,
     fontWeight: '700',
-    color: '#0D47A1',
-    marginBottom: 20,
+    color: '#1E293B',
+    marginBottom: 24,
+    textAlign: 'center',
   },
-  input: {
-    width: '100%',
+  modalInput: {
+    backgroundColor: '#FAFAFA',
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#B3E5FC',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 20,
-    fontSize: 16,
-    backgroundColor: '#FAFEFF',
-    color: '#263238',
+    borderColor: '#E2E8F0',
+    padding: 16,
+    fontSize: 16.5,
+    color: '#1E293B',
+    marginBottom: 28,
   },
-  modalButtons: {
+  modalButtonRow: {
     flexDirection: 'row',
-    width: '100%',
     justifyContent: 'space-between',
+    gap: 16,
   },
-  modalBtn: {
+  cancelModalBtn: {
     flex: 1,
-    paddingVertical: 14,
-    borderRadius: 10,
+    paddingVertical: 16,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
     alignItems: 'center',
-    marginHorizontal: 8,
   },
-  cancelBtn: {
-    backgroundColor: '#B0BEC5', // Soft gray
+  cancelModalText: {
+    color: '#475569',
+    fontSize: 16,
+    fontWeight: '600',
   },
-  assignBtn: {
-    backgroundColor: '#26A69A', // Teal
+  assignModalBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#26A69A',
+    paddingVertical: 16,
+    borderRadius: 16,
+    shadowColor: '#26A69A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 10,
+    elevation: 6,
   },
-  modalBtnText: {
+  assignModalText: {
     color: '#FFFFFF',
-    fontWeight: '600',
-    fontSize: 15,
-  },
-  modalBtnTextCancel: {
-    color: '#263238',
-    fontWeight: '600',
-    fontSize: 15,
+    fontSize: 16,
+    fontWeight: '700',
   },
 });

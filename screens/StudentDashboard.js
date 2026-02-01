@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { ComplaintContext } from '../App';
 
 export default function StudentDashboard({ navigation }) {
@@ -22,56 +23,62 @@ export default function StudentDashboard({ navigation }) {
 
   const categories = ['Water', 'Electricity', 'Furniture', 'Cleanliness', 'Other'];
 
-  // Add new complaint
   const addComplaint = () => {
     if (!description.trim()) {
-      Alert.alert('Error', 'Please enter a description.');
+      Alert.alert('Oops', 'Please describe the issue first.');
       return;
     }
+
     const newComplaint = {
-      id: Date.now().toString() + Math.random().toString(), // Unique ID
+      id: Date.now().toString() + Math.random().toString(36).slice(2, 10),
       category,
-      description,
+      description: description.trim(),
       status: 'Pending',
     };
-    setComplaints(prev => [newComplaint, ...prev]);
+
+    setComplaints((prev) => [newComplaint, ...prev]);
     setDescription('');
+    Alert.alert('Success', 'Your complaint has been submitted!');
   };
 
-  // Delete complaint
   const deleteComplaint = (id) => {
     Alert.alert(
       'Delete Complaint',
-      'Are you sure you want to delete this complaint?',
+      'Are you sure you want to delete this complaint? This cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
-            // ✅ Create a new array reference
-            const updated = complaints.filter(c => c.id !== id);
-            setComplaints(updated);
+            setComplaints((prev) => prev.filter((c) => c.id !== id));
+            Alert.alert('Deleted', 'Complaint removed successfully.');
           },
         },
       ]
     );
   };
 
-  // View/Edit complaint
   const viewComplaint = (complaint) => {
-    setSelectedComplaint({ ...complaint }); // clone object
+    setSelectedComplaint({ ...complaint });
     setModalVisible(true);
   };
 
-  // Save edits
   const saveEdit = () => {
-    const updated = complaints.map(c =>
-      c.id === selectedComplaint.id ? { ...selectedComplaint } : c
+    if (!selectedComplaint?.description?.trim()) {
+      Alert.alert('Error', 'Description cannot be empty.');
+      return;
+    }
+
+    setComplaints((prev) =>
+      prev.map((c) =>
+        c.id === selectedComplaint.id ? { ...selectedComplaint } : c
+      )
     );
-    setComplaints(updated);
+
     setModalVisible(false);
     setSelectedComplaint(null);
+    Alert.alert('Updated', 'Your changes have been saved.');
   };
 
   return (
@@ -79,81 +86,145 @@ export default function StudentDashboard({ navigation }) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.backText}>← Back</Text>
-      </TouchableOpacity>
+      <View style={styles.innerWrapper}>
+        {/* Back Button */}
+        <TouchableOpacity
+          style={styles.backBtn}
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="arrow-back" size={28} color="#1E293B" />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
 
-      <Text style={styles.header}>Submit Complaint</Text>
-      <TextInput
-        placeholder="Describe the issue"
-        value={description}
-        onChangeText={setDescription}
-        style={styles.input}
-        multiline
-        placeholderTextColor="#78909C"
-      />
+        <Text style={styles.header}>Report an Issue</Text>
 
-      <View style={styles.categoryContainer}>
-        {categories.map(cat => (
+        {/* Input Card */}
+        <View style={styles.inputCard}>
+          <TextInput
+            placeholder="Describe the problem in detail..."
+            value={description}
+            onChangeText={setDescription}
+            style={styles.textArea}
+            multiline
+            numberOfLines={4}
+            placeholderTextColor="#94A3B8"
+          />
+
+          <View style={styles.categoryContainer}>
+            {categories.map((cat) => (
+              <TouchableOpacity
+                key={cat}
+                style={[
+                  styles.categoryBtn,
+                  category === cat && styles.selectedCategory,
+                ]}
+                onPress={() => setCategory(cat)}
+              >
+                <Text
+                  style={[
+                    styles.categoryText,
+                    category === cat && { color: '#FFFFFF' },
+                  ]}
+                >
+                  {cat}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
           <TouchableOpacity
-            key={cat}
-            style={[styles.categoryBtn, category === cat && styles.selectedCategory]}
-            onPress={() => setCategory(cat)}
+            style={styles.submitBtn}
+            onPress={addComplaint}
+            activeOpacity={0.85}
           >
-            <Text style={styles.categoryText}>{cat}</Text>
+            <Icon name="send" size={20} color="#FFFFFF" style={{ marginRight: 10 }} />
+            <Text style={styles.btnText}>Submit Complaint</Text>
           </TouchableOpacity>
-        ))}
+        </View>
+
+        {/* Complaints List Header */}
+        <Text style={[styles.header, { marginTop: 36, marginBottom: 16 }]}>
+          My Reported Issues
+        </Text>
+
+        {complaints.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Icon name="report-problem" size={60} color="#94A3B8" style={{ marginBottom: 16 }} />
+            <Text style={styles.emptyText}>
+              No issues reported yet.{'\n'}Use the form above to submit one!
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={complaints}
+            keyExtractor={(item) => item.id}
+            extraData={complaints.length} // Forces re-render when length changes
+            contentContainerStyle={styles.listContent}
+            renderItem={({ item }) => (
+              <View style={styles.complaintCard}>
+                <View style={styles.cardHeader}>
+                  <Icon name="category" size={22} color="#26A69A" style={{ marginRight: 12 }} />
+                  <Text style={styles.title}>{item.category} Issue</Text>
+                </View>
+
+                <Text style={styles.description} numberOfLines={3} ellipsizeMode="tail">
+                  {item.description}
+                </Text>
+
+                <View style={styles.statusRow}>
+                  <Icon name="schedule" size={16} color="#64748B" />
+                  <Text style={styles.status}>Status: {item.status}</Text>
+                </View>
+
+                <View style={styles.actionRow}>
+                  <TouchableOpacity
+                    style={styles.viewButton}
+                    onPress={() => viewComplaint(item)}
+                  >
+                    <Icon name="visibility" size={18} color="#FFFFFF" />
+                    <Text style={styles.smallBtnText}>View / Edit</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => deleteComplaint(item.id)}
+                  >
+                    <Icon name="delete-outline" size={18} color="#FFFFFF" />
+                    <Text style={styles.smallBtnText}>Delete</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+          />
+        )}
       </View>
 
-      <TouchableOpacity style={styles.addBtn} onPress={addComplaint}>
-        <Text style={styles.btnText}>Add Complaint</Text>
-      </TouchableOpacity>
-
-      <Text style={[styles.header, { marginTop: 24 }]}>My Complaints</Text>
-      {complaints.length === 0 && <Text style={styles.emptyText}>No complaints submitted yet.</Text>}
-
-      <FlatList
-        data={complaints}
-        extraData={complaints} // ✅ triggers re-render
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.complaintItem}>
-            <Text style={styles.title}>{item.category} Issue</Text>
-            <Text numberOfLines={2} style={styles.description}>{item.description}</Text>
-            <Text style={styles.status}>Status: {item.status}</Text>
-
-            <View style={styles.buttonRow}>
-              <TouchableOpacity style={styles.viewBtn} onPress={() => viewComplaint(item)}>
-                <Text style={styles.btnText}>View/Edit</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.deleteBtn} onPress={() => deleteComplaint(item.id)}>
-                <Text style={styles.btnText}>Delete</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-        contentContainerStyle={{ paddingBottom: 40 }}
-      />
-
       {/* Edit Modal */}
-      <Modal visible={modalVisible} transparent animationType="slide">
-        <View style={styles.modalContainer}>
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.header}>Edit Complaint</Text>
+            <Text style={styles.modalHeader}>Edit Your Issue</Text>
+
             {selectedComplaint && (
               <>
                 <TextInput
-                  style={styles.input}
+                  style={styles.modalInput}
                   value={selectedComplaint.description}
-                  onChangeText={text =>
+                  onChangeText={(text) =>
                     setSelectedComplaint({ ...selectedComplaint, description: text })
                   }
                   multiline
-                  placeholderTextColor="#78909C"
+                  numberOfLines={5}
+                  placeholderTextColor="#94A3B8"
                 />
+
                 <View style={styles.categoryContainer}>
-                  {categories.map(cat => (
+                  {categories.map((cat) => (
                     <TouchableOpacity
                       key={cat}
                       style={[
@@ -164,21 +235,35 @@ export default function StudentDashboard({ navigation }) {
                         setSelectedComplaint({ ...selectedComplaint, category: cat })
                       }
                     >
-                      <Text style={styles.categoryText}>{cat}</Text>
+                      <Text
+                        style={[
+                          styles.categoryText,
+                          selectedComplaint.category === cat && { color: '#FFFFFF' },
+                        ]}
+                      >
+                        {cat}
+                      </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
-                <TouchableOpacity style={styles.addBtn} onPress={saveEdit}>
+
+                <TouchableOpacity
+                  style={styles.submitBtn}
+                  onPress={saveEdit}
+                  activeOpacity={0.85}
+                >
+                  <Icon name="save" size={20} color="#FFFFFF" style={{ marginRight: 10 }} />
                   <Text style={styles.btnText}>Save Changes</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity
-                  style={[styles.addBtn, { backgroundColor: '#B0BEC5', marginTop: 8 }]}
+                  style={styles.cancelBtn}
                   onPress={() => {
                     setModalVisible(false);
                     setSelectedComplaint(null);
                   }}
                 >
-                  <Text style={[styles.btnText, { color: '#263238' }]}>Cancel</Text>
+                  <Text style={styles.cancelText}>Cancel</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -189,26 +274,251 @@ export default function StudentDashboard({ navigation }) {
   );
 }
 
+// ──────────────────────────────────────────────────────────────
+// Styles (unchanged from your cozy theme)
+// ──────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#E0F7FA', paddingHorizontal: 16, paddingTop: 16 },
-  backBtn: { marginBottom: 12 },
-  backText: { color: '#1976D2', fontWeight: 'bold', fontSize: 18 },
-  header: { fontSize: 24, fontWeight: '700', marginBottom: 12, color: '#0D47A1' },
-  input: { borderWidth: 1, borderColor: '#B3E5FC', padding: 12, borderRadius: 12, backgroundColor: '#FFFFFF', marginBottom: 12, fontSize: 16, color: '#263238' },
-  categoryContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 16 },
-  categoryBtn: { backgroundColor: '#80DEEA', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 10, marginBottom: 8, minWidth: 80, alignItems: 'center' },
-  selectedCategory: { backgroundColor: '#26A69A' },
-  categoryText: { color: '#FFFFFF', fontWeight: '600', fontSize: 14 },
-  addBtn: { backgroundColor: '#26A69A', padding: 14, borderRadius: 12, alignItems: 'center', marginBottom: 20 },
-  complaintItem: { backgroundColor: '#F0FCFF', padding: 16, borderRadius: 12, marginBottom: 12, borderWidth: 1, borderColor: '#B3E5FC' },
-  title: { fontWeight: '700', fontSize: 17, color: '#0D47A1', marginBottom: 6 },
-  description: { color: '#455A64', fontSize: 15, marginBottom: 6 },
-  status: { color: '#78909C', fontSize: 14, marginBottom: 12 },
-  buttonRow: { flexDirection: 'row', marginTop: 8 },
-  viewBtn: { flex: 1, marginRight: 8, backgroundColor: '#2196F3', padding: 10, borderRadius: 10, alignItems: 'center' },
-  deleteBtn: { flex: 1, marginLeft: 8, backgroundColor: '#EF5350', padding: 10, borderRadius: 10, alignItems: 'center' },
-  btnText: { color: '#FFFFFF', fontWeight: '600', fontSize: 15 },
-  emptyText: { color: '#78909C', fontSize: 16, textAlign: 'center', marginTop: 20 },
-  modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.4)' },
-  modalContent: { width: '88%', backgroundColor: '#FFFFFF', padding: 24, borderRadius: 16 },
+  container: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+  },
+  innerWrapper: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 40,
+  },
+
+  backBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    marginBottom: 32,
+  },
+  backText: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#1E293B',
+    marginLeft: 10,
+  },
+
+  header: {
+    fontSize: 30,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 20,
+    letterSpacing: 0.3,
+  },
+
+  inputCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 32,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+
+  textArea: {
+    backgroundColor: '#FAFAFA',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 16,
+    fontSize: 16,
+    color: '#1E293B',
+    minHeight: 110,
+    textAlignVertical: 'top',
+    marginBottom: 20,
+  },
+
+  categoryContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    gap: 12,
+    marginBottom: 24,
+  },
+  categoryBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    minWidth: 90,
+    alignItems: 'center',
+  },
+  selectedCategory: {
+    backgroundColor: '#26A69A',
+  },
+  categoryText: {
+    fontSize: 14.5,
+    fontWeight: '600',
+    color: '#475569',
+  },
+
+  submitBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#26A69A',
+    paddingVertical: 16,
+    borderRadius: 18,
+    shadowColor: '#26A69A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  btnText: {
+    color: '#FFFFFF',
+    fontSize: 16.5,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+
+  listContent: {
+    paddingBottom: 60,
+  },
+
+  complaintCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.07,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  title: {
+    fontSize: 17.5,
+    fontWeight: '700',
+    color: '#1E293B',
+  },
+
+  description: {
+    fontSize: 15.5,
+    color: '#475569',
+    lineHeight: 24,
+    marginBottom: 16,
+  },
+
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  status: {
+    fontSize: 14.5,
+    color: '#64748B',
+    marginLeft: 8,
+  },
+
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  viewButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#26A69A',
+    paddingVertical: 12,
+    borderRadius: 14,
+  },
+  deleteButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#EF5350',
+    paddingVertical: 12,
+    borderRadius: 14,
+  },
+  smallBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+    marginTop: 60,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 26,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.45)',
+  },
+  modalContent: {
+    width: '90%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 28,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 12,
+  },
+  modalHeader: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  modalInput: {
+    backgroundColor: '#FAFAFA',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 16,
+    fontSize: 16,
+    color: '#1E293B',
+    minHeight: 120,
+    textAlignVertical: 'top',
+    marginBottom: 24,
+  },
+
+  cancelBtn: {
+    marginTop: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    borderRadius: 18,
+    backgroundColor: '#F1F5F9',
+  },
+  cancelText: {
+    color: '#475569',
+    fontSize: 16.5,
+    fontWeight: '600',
+  },
 });

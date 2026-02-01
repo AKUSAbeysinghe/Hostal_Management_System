@@ -1,11 +1,18 @@
 import React, { useContext } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { ComplaintContext } from '../App';
 
 export default function StaffDashboard({ navigation }) {
   const { complaints, setComplaints } = useContext(ComplaintContext);
 
-  // Filter only assigned tasks (assuming assignedTo is set somewhere)
   const assignedTasks = complaints.filter((c) => c.assignedTo);
 
   const markCompleted = (id) => {
@@ -18,132 +25,203 @@ export default function StaffDashboard({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* Back Button – same as Login/Register */}
       <TouchableOpacity
         style={styles.backBtn}
-        onPress={() => navigation.navigate('Login')}
+        onPress={() => navigation.goBack()}  // ← fixed: goes to previous screen
       >
-        <Text style={styles.backText}>← Back</Text>
+        <Icon name="arrow-back" size={28} color="#1E293B" />
+        <Text style={styles.backText}>Back</Text>
       </TouchableOpacity>
 
-      <Text style={styles.header}>Staff Dashboard</Text>
+      <Text style={styles.header}>Your Assigned Tasks</Text>
 
-      {assignedTasks.length === 0 && (
-        <Text style={styles.emptyText}>No tasks assigned yet.</Text>
+      {assignedTasks.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Icon name="assignment-late" size={64} color="#94A3B8" style={{ marginBottom: 16 }} />
+          <Text style={styles.emptyText}>
+            No tasks assigned to you yet.{'\n'}
+            Check back later or contact admin.
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={assignedTasks}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          renderItem={({ item }) => (
+            <View style={styles.taskCard}>
+              <View style={styles.cardHeader}>
+                <Icon name="build" size={26} color="#26A69A" style={styles.headerIcon} />
+                <Text style={styles.taskTitle}>{item.category} Issue</Text>
+              </View>
+
+              <Text style={styles.description}>{item.description}</Text>
+
+              <View style={styles.metaContainer}>
+                <View style={styles.metaRow}>
+                  <Icon name="person" size={18} color="#64748B" />
+                  <Text style={styles.metaText}>Assigned to: {item.assignedTo}</Text>
+                </View>
+                <View style={styles.metaRow}>
+                  <Icon name="schedule" size={18} color="#64748B" />
+                  <Text style={styles.metaText}>Status: {item.status}</Text>
+                </View>
+              </View>
+
+              {item.status !== 'Completed' ? (
+                <TouchableOpacity
+                  style={styles.completeButton}
+                  onPress={() => markCompleted(item.id)}
+                  activeOpacity={0.85}
+                >
+                  <Icon name="check-circle-outline" size={22} color="#FFFFFF" style={{ marginRight: 10 }} />
+                  <Text style={styles.buttonText}>Mark as Completed</Text>
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.completedContainer}>
+                  <Icon name="check-circle" size={24} color="#26A69A" />
+                  <Text style={styles.completedText}>Task Completed ✓</Text>
+                </View>
+              )}
+            </View>
+          )}
+        />
       )}
-
-      <FlatList
-        data={assignedTasks}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text style={styles.title}>{item.category} Issue</Text>
-            <Text style={styles.description}>{item.description}</Text>
-            <Text style={styles.status}>Status: {item.status}</Text>
-            <Text style={styles.assigned}>Assigned To: {item.assignedTo}</Text>
-
-            {item.status !== 'Completed' && (
-              <TouchableOpacity
-                style={styles.btn}
-                onPress={() => markCompleted(item.id)}
-              >
-                <Text style={styles.btnText}>Mark as Completed</Text>
-              </TouchableOpacity>
-            )}
-
-            {item.status === 'Completed' && (
-              <Text style={styles.completedText}>✓ Task Completed</Text>
-            )}
-          </View>
-        )}
-      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    padding: 16, 
-    backgroundColor: '#E0F7FA'    // Light cyan / pale turquoise (same as student dashboard)
+  container: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: 24,
+    paddingTop: 40,
   },
-  backBtn: { 
-    marginBottom: 12 
-  },
-  backText: { 
-    color: '#1976D2',           // Deep blue (consistent with student screen)
-    fontWeight: 'bold', 
-    fontSize: 18 
-  },
-  header: { 
-    fontSize: 24, 
-    fontWeight: '700', 
-    marginBottom: 16, 
-    color: '#0D47A1'            // Deep navy blue for headers
-  },
-  emptyText: { 
-    color: '#78909C', 
-    fontSize: 16, 
-    textAlign: 'center', 
-    marginTop: 24 
-  },
-  item: { 
-    backgroundColor: '#F0FCFF',   // Very light cyan-white card
-    padding: 16, 
-    borderRadius: 12, 
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#B3E5FC',       // Soft cyan border
-    // subtle shadow for depth
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  title: { 
-    fontWeight: '700', 
-    fontSize: 17, 
-    color: '#0D47A1',           // Deep blue
-    marginBottom: 6 
-  },
-  description: { 
-    color: '#455A64', 
-    fontSize: 15, 
-    marginBottom: 6 
-  },
-  status: { 
-    color: '#78909C', 
-    fontSize: 14, 
-    marginBottom: 6 
-  },
-  assigned: { 
-    color: '#546E7A', 
-    fontSize: 14, 
-    marginBottom: 12 
-  },
-  btn: { 
-    marginTop: 8, 
-    backgroundColor: '#26A69A',   // Mint teal primary action color
-    padding: 12, 
-    borderRadius: 10, 
+
+  backBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-    // Optional depth
+    alignSelf: 'flex-start',
+    marginBottom: 32,
+  },
+  backText: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#1E293B',
+    marginLeft: 10,
+  },
+
+  header: {
+    fontSize: 30,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 32,
+    letterSpacing: 0.3,
+  },
+
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 26,
+  },
+
+  listContent: {
+    paddingBottom: 40,
+  },
+
+  taskCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 3,
   },
-  btnText: { 
-    color: '#FFFFFF', 
-    fontWeight: '600', 
-    fontSize: 15 
+
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
   },
-  completedText: { 
-    marginTop: 12, 
-    color: '#26A69A',           // Teal success color
-    fontWeight: 'bold', 
-    fontSize: 15, 
-    textAlign: 'center' 
+  headerIcon: {
+    marginRight: 14,
+  },
+  taskTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1E293B',
+  },
+
+  description: {
+    fontSize: 15.5,
+    color: '#475569',
+    lineHeight: 24,
+    marginBottom: 20,
+  },
+
+  metaContainer: {
+    marginBottom: 20,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  metaText: {
+    fontSize: 14.5,
+    color: '#64748B',
+    marginLeft: 8,
+  },
+
+  completeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#26A69A',
+    paddingVertical: 16,
+    borderRadius: 16,
+    shadowColor: '#26A69A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16.5,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+
+  completedContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F0FDF4',
+    paddingVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#DCFCE7',
+  },
+  completedText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#26A69A',
+    marginLeft: 10,
   },
 });
