@@ -6,119 +6,161 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Keyboard,
-  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-export default function RegisterScreen({ navigation }) {
-  const [name, setName] = useState('');
+export default function UserRegisterScreen({ navigation }) {
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleRegister = () => {
-    // TODO: Add real registration logic here
+    console.log('User registration:', { fullName, email, password });
     navigation.navigate('Login');
   };
 
-  // Optional: hide keyboard when tapping outside inputs
-  const dismissKeyboard = () => Keyboard.dismiss();
-
   return (
-    <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
-      <View style={styles.container}>
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.innerContainer}>
-            {/* Header Icon */}
-            <Icon name="how-to-reg" size={80} color="#26A69A" style={styles.logo} />
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: '#E0F7FA' }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.innerContainer}>
 
-            <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Register to report hostel issues easily</Text>
+          {/* 🔙 Back Button */}
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => navigation.goBack()}
+          >
+            <Icon name="arrow-back" size={26} color="#004D40" />
+            <Text style={styles.backText}>Back</Text>
+          </TouchableOpacity>
 
-            {/* Full Name Field */}
-            <View style={styles.inputWrapper}>
-              <Icon name="person-add" size={22} color="#78909C" style={styles.inputIcon} />
+          {/* Topic */}
+          <Text style={styles.topicText}>🏠 Hostel Issue Reporter</Text>
+
+          <Icon
+            name="how-to-reg"
+            size={80}
+            color="#26A69A"
+            style={styles.logo}
+          />
+
+          <Text style={styles.title}>User Registration</Text>
+          <Text style={styles.subtitle}>
+            Create your account to report hostel issues easily
+          </Text>
+
+          {/* Full Name */}
+          <View style={styles.inputWrapper}>
+            <Text style={styles.inputLabel}>Full Name</Text>
+            <View style={styles.inputBox}>
+              <Icon name="person-add" size={22} color="#00796B" style={styles.inputIcon} />
               <TextInput
-                placeholder="Full Name"
-                value={name}
-                onChangeText={setName}
+                value={fullName}
+                onChangeText={setFullName}
                 style={styles.input}
-                placeholderTextColor="#78909C"
+                placeholder="Enter full name"
+                placeholderTextColor="#00796B"
                 autoCapitalize="words"
               />
             </View>
+          </View>
 
-            {/* Email / University ID Field */}
-            <View style={styles.inputWrapper}>
-              <Icon name="mail" size={22} color="#78909C" style={styles.inputIcon} />
+          {/* Email */}
+          <View style={styles.inputWrapper}>
+            <Text style={styles.inputLabel}>Email / University ID</Text>
+            <View style={styles.inputBox}>
+              <Icon name="mail" size={22} color="#00796B" style={styles.inputIcon} />
               <TextInput
-                placeholder="Email / University ID"
                 value={email}
                 onChangeText={setEmail}
                 style={styles.input}
-                placeholderTextColor="#78909C"
+                placeholder="Enter email or ID"
+                placeholderTextColor="#00796B"
                 autoCapitalize="none"
                 keyboardType="email-address"
               />
             </View>
+          </View>
 
-            {/* Password Field */}
-            <View style={styles.inputWrapper}>
-              <Icon name="lock" size={22} color="#78909C" style={styles.inputIcon} />
+          {/* Password */}
+          <View style={styles.inputWrapper}>
+            <Text style={styles.inputLabel}>Password</Text>
+            <View style={styles.inputBox}>
+              <Icon name="lock" size={22} color="#00796B" style={styles.inputIcon} />
               <TextInput
-                placeholder="Password"
                 value={password}
                 onChangeText={setPassword}
                 style={styles.input}
+                placeholder="Enter password"
+                placeholderTextColor="#00796B"
                 secureTextEntry
-                placeholderTextColor="#78909C"
               />
             </View>
-
-            {/* Register Button */}
-            <TouchableOpacity style={styles.btn} onPress={handleRegister}>
-              <Icon name="person-add-alt-1" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-              <Text style={styles.btnText}>Register</Text>
-            </TouchableOpacity>
-
-            {/* Login Link */}
-            <TouchableOpacity
-              style={styles.loginLink}
-              onPress={() => navigation.navigate('Login')}
-            >
-              <Text style={styles.loginText}>
-                Already have an account? <Text style={{ fontWeight: 'bold' }}>Login</Text>
-              </Text>
-            </TouchableOpacity>
-
-            {/* Extra bottom space – helps last input stay visible */}
-            <View style={{ height: 120 }} />
           </View>
-        </ScrollView>
-      </View>
-    </TouchableWithoutFeedback>
+
+          {/* Register Button */}
+          <TouchableOpacity style={styles.btn} onPress={handleRegister}>
+            <Icon name="person-add-alt-1" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+            <Text style={styles.btnText}>Register</Text>
+          </TouchableOpacity>
+
+          {/* Login Link */}
+          <TouchableOpacity
+            style={styles.loginLink}
+            onPress={() => navigation.navigate('Login')}
+          >
+            <Text style={styles.loginText}>
+              Already have an account? <Text style={{ fontWeight: 'bold' }}>Login</Text>
+            </Text>
+          </TouchableOpacity>
+
+          <View style={{ height: 120 }} />
+
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
+/* ───── Styles ───── */
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#E0F7FA',
-  },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 40,
   },
   innerContainer: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 40,       // ← increased breathing room
+  },
+
+  /* Back Button */
+  backBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    marginBottom: 12,
+  },
+  backText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#004D40',
+    marginLeft: 6,
+  },
+
+  topicText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#004D40',
+    marginBottom: 16,
   },
   logo: {
     marginBottom: 24,
@@ -127,24 +169,32 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#0D47A1',
+    color: '#004D40',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#455A64',
+    color: '#00695C',
     marginBottom: 32,
     textAlign: 'center',
   },
   inputWrapper: {
+    width: '100%',
+    marginBottom: 16,
+  },
+  inputLabel: {
+    color: '#004D40',
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  inputBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '100%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#B2DFDB',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#B3E5FC',
-    marginBottom: 16,
+    borderColor: '#00796B',
     paddingHorizontal: 12,
   },
   inputIcon: {
@@ -154,21 +204,17 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     fontSize: 16,
-    color: '#263238',
+    color: '#004D40',
   },
   btn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#26A69A',
+    backgroundColor: '#00796B',
     paddingVertical: 16,
     width: '100%',
     borderRadius: 12,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
     elevation: 4,
   },
   btnText: {
@@ -180,7 +226,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   loginText: {
-    color: '#1976D2',
+    color: '#004D40',
     fontSize: 15,
   },
 });
