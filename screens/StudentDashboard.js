@@ -42,21 +42,33 @@ export default function StudentDashboard({ navigation }) {
   };
 
   const deleteComplaint = (id) => {
-    Alert.alert(
-      'Delete Complaint',
-      'Are you sure you want to delete this complaint? This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            setComplaints((prev) => prev.filter((c) => c.id !== id));
-            Alert.alert('Deleted', 'Complaint removed successfully.');
+    const handleDeletion = () => {
+      setComplaints((prev) => prev.filter((c) => c.id !== id));
+      if (Platform.OS === 'web') {
+        alert('Complaint removed successfully.');
+      } else {
+        Alert.alert('Deleted', 'Complaint removed successfully.');
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm('Are you sure you want to delete this complaint? This cannot be undone.')) {
+        handleDeletion();
+      }
+    } else {
+      Alert.alert(
+        'Delete Complaint',
+        'Are you sure you want to delete this complaint? This cannot be undone.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: handleDeletion,
           },
-        },
-      ]
-    );
+        ]
+      );
+    }
   };
 
   const viewComplaint = (complaint) => {
@@ -158,7 +170,7 @@ export default function StudentDashboard({ navigation }) {
           <FlatList
             data={complaints}
             keyExtractor={(item) => item.id}
-            extraData={complaints.length} // Forces re-render when length changes
+            extraData={complaints} // Forces re-render when complaints change
             contentContainerStyle={styles.listContent}
             renderItem={({ item }) => (
               <View style={styles.complaintCard}>
