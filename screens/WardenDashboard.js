@@ -54,7 +54,7 @@ export default function WardenDashboard({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Back Button – same as other screens */}
+      {/* Back Button */}
       <TouchableOpacity
         style={styles.backBtn}
         onPress={() => navigation.goBack()}

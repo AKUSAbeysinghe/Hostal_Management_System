@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useFocusEffect } from '@react-navigation/native'; // optional if needed later
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function UserRegisterScreen({ navigation }) {
   const [fullName, setFullName] = useState('');
@@ -19,7 +19,6 @@ export default function UserRegisterScreen({ navigation }) {
 
   const handleRegister = () => {
     console.log('User registration:', { fullName, email, password });
-    // In real app → add validation + API call here
     navigation.navigate('Login');
   };
 

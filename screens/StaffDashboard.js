@@ -25,10 +25,10 @@ export default function StaffDashboard({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Back Button – same as Login/Register */}
+      {/* Back Button*/}
       <TouchableOpacity
         style={styles.backBtn}
-        onPress={() => navigation.goBack()}  // ← fixed: goes to previous screen
+        onPress={() => navigation.goBack()}
       >
         <Icon name="arrow-back" size={28} color="#1E293B" />
         <Text style={styles.backText}>Back</Text>

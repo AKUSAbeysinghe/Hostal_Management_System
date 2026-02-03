@@ -286,10 +286,7 @@ export default function StudentDashboard({ navigation }) {
   );
 }
 
-// ──────────────────────────────────────────────────────────────
-// Styles (unchanged from your cozy theme)
-// ──────────────────────────────────────────────────────────────
-
+ 
 const styles = StyleSheet.create({
   container: {
     flex: 1,

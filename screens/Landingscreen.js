@@ -30,34 +30,24 @@ export default function LandingScreen({ navigation }) {
 
         {/* Teams Section */}
         <View style={styles.teamsContainer}>
-          {/* Cleaning */}
+       
           <TouchableOpacity style={[styles.teamCard, { backgroundColor: '#E0F2F1' }]}>
             <Icon name="cleaning-services" size={44} color="#26A69A" style={styles.teamIcon} />
             <Text style={styles.teamText}>Cleaning</Text>
           </TouchableOpacity>
 
-          {/* Reception */}
+        
           <TouchableOpacity style={[styles.teamCard, { backgroundColor: '#E0F2F1' }]}>
             <Icon name="support-agent" size={44} color="#26A69A" style={styles.teamIcon} />
             <Text style={styles.teamText}>Reception</Text>
           </TouchableOpacity>
 
-          {/* Kitchen */}
+       
           <TouchableOpacity style={[styles.teamCard, { backgroundColor: '#E0F2F1' }]}>
             <Icon name="room-service" size={44} color="#26A69A" style={styles.teamIcon} />
             <Text style={styles.teamText}>Kitchen</Text>
           </TouchableOpacity>
 
-          {/* Optional Add Team */}
-          {/* 
-          <TouchableOpacity
-            style={styles.addTeamCard}
-            onPress={() => alert('Add new team feature coming soon!')}
-          >
-            <Icon name="add-circle-outline" size={48} color="#26A69A" style={styles.addIcon} />
-            <Text style={styles.addText}>Add Team</Text>
-          </TouchableOpacity>
-          */}
         </View>
 
         {/* Login / Register Buttons */}
@@ -86,7 +76,7 @@ export default function LandingScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC', // light neutral background
+    backgroundColor: '#F8FAFC', 
   },
   scrollContainer: {
     alignItems: 'center',
@@ -102,7 +92,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#1E293B', // dark slate for readability
+    color: '#1E293B',
     marginBottom: 8,
     letterSpacing: 0.4,
   },
@@ -144,7 +134,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  // ── Add Team Card (optional) ──
+
   addTeamCard: {
     width: 108,
     height: 118,
@@ -154,7 +144,7 @@ const styles = StyleSheet.create({
     borderColor: '#26A69A',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(38, 166, 154, 0.08)', // light tint of #26A69A
+    backgroundColor: 'rgba(38, 166, 154, 0.08)', 
   },
   addIcon: {
     marginBottom: 8,
@@ -165,13 +155,13 @@ const styles = StyleSheet.create({
     color: '#26A69A',
   },
 
-  // ── Buttons ──
+ 
   buttonContainer: {
     width: '82%',
     marginTop: 16,
   },
   loginBtn: {
-    backgroundColor: '#26A69A', // ← your requested color
+    backgroundColor: '#26A69A', 
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center',
@@ -188,7 +178,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#26A69A', // ← your color
+    borderColor: '#26A69A', 
   },
   btnText: {
     color: '#FFFFFF',
@@ -197,7 +187,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   registerBtnText: {
-    color: '#26A69A', // ← your color
+    color: '#26A69A', 
     fontSize: 17,
     fontWeight: '700',
     letterSpacing: 0.3,

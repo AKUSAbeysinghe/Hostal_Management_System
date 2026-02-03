@@ -9,7 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons'; // ← switched to MaterialIcons to match landing
+import Icon from 'react-native-vector-icons/MaterialIcons'; 
 import { useFocusEffect } from '@react-navigation/native';
 
 export default function LoginScreen({ navigation }) {
@@ -43,7 +43,7 @@ export default function LoginScreen({ navigation }) {
       >
         <View style={styles.innerContainer}>
 
-          {/* Back Button – style similar to potential header elements */}
+         
           <TouchableOpacity
             style={styles.backBtn}
             onPress={() => navigation.goBack()}
@@ -55,7 +55,7 @@ export default function LoginScreen({ navigation }) {
           <Text style={styles.welcomeText}>Welcome Back</Text>
 
           <Icon
-            name="home" // or "apartment" – kept simple & matching theme
+            name="home"
             size={90}
             color="#26A69A"
             style={styles.logo}
@@ -132,7 +132,7 @@ export default function LoginScreen({ navigation }) {
             ))}
           </View>
 
-          {/* Sign In Button – matches loginBtn from landing */}
+          {/* Sign In Button*/}
           <TouchableOpacity
             style={styles.loginBtn}
             onPress={handleLogin}
@@ -141,7 +141,7 @@ export default function LoginScreen({ navigation }) {
             <Text style={styles.btnText}>Sign In</Text>
           </TouchableOpacity>
 
-          {/* Register Link – similar to registerBtn text style */}
+          {/* Register Link*/}
           <TouchableOpacity
             style={styles.registerLink}
             onPress={() => navigation.navigate('Register')}
